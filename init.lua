@@ -36,7 +36,7 @@ SNOWBALL.on_step = function(self, dtime)
 	if self.timer > 0.2 then
 		local objs = minetest.get_objects_inside_radius({x = pos.x, y = pos.y, z = pos.z}, 1)
 		for k, obj in pairs(objs) do
-			if obj:get_luaentity() == nil or obj:get_luaentity().name ~= "snowball:ball" then
+			if obj:get_luaentity() == nil or obj:get_luaentity()._cmi_is_mob then
 				obj:punch(self.object, 1.0, {
 					full_punch_interval = 1.0,
 					damage_groups= {fleshy = 1},
