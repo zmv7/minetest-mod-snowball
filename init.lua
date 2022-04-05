@@ -1,3 +1,4 @@
+local thrower
 minetest.register_on_mods_loaded(function()
 minetest.override_item("default:snow", {
 	on_use = function(itemstack, user, pointed_thing)
@@ -5,7 +6,7 @@ minetest.override_item("default:snow", {
 		end
 		local pos = user:getpos()
 		local dir = user:get_look_dir()
-		local yaw = user:get_look_yaw()
+		local yaw = user:get_look_horizontal()
 		if pos and dir then
 			pos.y = pos.y + 1.5
 			local obj = minetest.add_entity(pos, "snowball:ball")
@@ -13,6 +14,7 @@ minetest.override_item("default:snow", {
 				obj:setvelocity({x=dir.x * 20, y=dir.y * 20, z=dir.z * 20})
 				obj:setacceleration({x=dir.x * -3, y=-10, z=dir.z * -3})
 				obj:setyaw(yaw)
+				thrower = user
 			end
 		end
 		return itemstack
@@ -23,21 +25,24 @@ local SNOWBALL = {
 	physical = false,
 	timer = 0,
 	visual = "sprite",
-	visual_size = {x=0.5, y=0.5,},
+	visual_size = {x=0.5, y=0.5},
 	textures = {'default_snowball.png'},
 	lastpos= {},
-	collisionbox = {0, 0, 0, 0, 0, 0},
+	collisionbox = {-0.25,-0.25,-0.25,0.25,0.25,0.25},
+	--selectionbox = {-0.25,-0.25,-0.25,0.25,0.25,0.25},
+	collide_with_objects = false,
 }
 SNOWBALL.on_step = function(self, dtime)
 	self.timer = self.timer + dtime
 	local pos = self.object:getpos()
+	local yaw = self.object:getyaw()
 	local node = minetest.get_node(pos)
 
 	if self.timer > 0.2 then
-		local objs = minetest.get_objects_inside_radius({x = pos.x, y = pos.y, z = pos.z}, 1)
+		local objs = minetest.get_objects_inside_radius({x = pos.x, y = pos.y-1, z = pos.z}, 1)
 		for k, obj in pairs(objs) do
 			if obj:is_player() or obj:get_luaentity()._cmi_is_mob then
-				obj:punch(self.object, 1.0, {
+				obj:punch(thrower, 1.0, {
 					full_punch_interval = 1.0,
 					damage_groups= {fleshy = 1},
 				}, nil)
@@ -48,7 +53,7 @@ SNOWBALL.on_step = function(self, dtime)
 	end
 
 	if self.lastpos.x ~= nil then
-		if minetest.registered_nodes[node.name].walkable then
+		if minetest.registered_nodes[node.name].walkable and node.name ~= "default:snow" then
 			if not minetest.is_protected(self.lastpos,"") then
 				minetest.add_node(self.lastpos, {name="default:snow",param2=0})
 				minetest.check_for_falling(self.lastpos)
