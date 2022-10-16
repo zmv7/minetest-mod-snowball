@@ -49,8 +49,9 @@ snowball.on_step = function(self, dtime, moveresult)
 		for k, obj in pairs(objs) do
 		if not obj then goto nodes end
 		local prop = obj:get_properties()
+		local name = obj:get_luaentity() and obj:get_luaentity().name
 		if not prop then goto nodes end
-			if obj:is_player() or prop.collide_with_objects == true then
+			if obj:is_player() or (prop.physical == true and name ~= "snowball:snowball") then
 				local thrower = self["thrower"] or self.object
 				obj:punch(thrower, 1.0, {
 					full_punch_interval = 1.0,
