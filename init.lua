@@ -9,11 +9,12 @@ core.register_on_mods_loaded(function()
 			local pos = user:get_pos()
 			local dir = user:get_look_dir()
 			local yaw = user:get_look_horizontal()
+			local vel = user:get_velocity()
 			if pos and dir then
 				pos.y = pos.y + 1.5
 				local obj = core.add_entity(pos, "snowball:snowball", name)
 				if obj then
-					obj:set_velocity({x=dir.x * 20, y=dir.y * 20, z=dir.z * 20})
+					obj:set_velocity({x=dir.x * 20 + vel.x, y=dir.y * 20 + vel.y, z=dir.z * 20 + vel.z})
 					obj:set_acceleration({x=dir.x * -3, y=-10, z=dir.z * -3})
 					obj:set_yaw(yaw)
 				end
